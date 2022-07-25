@@ -9,7 +9,7 @@ import cv2
 import numpy as np
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-path = '../Img/6cp.jpg'
+path = '../Img/6.jpg'
 org_image = cv2.imread(path)
 image = org_image
 ratio = image.shape[1] / float(image.shape[1])
@@ -52,12 +52,8 @@ cv2.drawContours(output, [receiptCnt], -1, (0, 255, 0), 2)
 
 
 receipt = four_point_transform(image, receiptCnt.reshape(4, 2) * ratio)
-cv2.imshow('c',receipt)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
-
 gray = cv2.cvtColor(receipt, cv2.COLOR_BGR2GRAY)
-resized_gray = cv2.resize(gray,(104,104))
+resized_gray = cv2.resize(gray,(28,28))
 
 
 text = pytesseract.image_to_string(resized_gray, config="--psm 6")
