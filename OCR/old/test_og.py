@@ -8,7 +8,7 @@ import cv2
 import numpy as np
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-path = 'Img/7.jpg'
+path = 'Img/8.jpg'
 org_image = cv2.imread(path)
 image = org_image
 ratio = image.shape[1] / float(image.shape[1])
@@ -20,9 +20,9 @@ gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 blurred = cv2.GaussianBlur(gray, (5, 5,), 0)
 edged = cv2.Canny(blurred, 75, 200)
 
-#cv2.imshow('c',edged)
-#cv2.waitKey(0)
-#cv2.destroyAllWindows()
+# cv2.imshow('c',edged)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 cnts = imutils.grab_contours(cnts)
@@ -51,25 +51,30 @@ cv2.drawContours(output, [receiptCnt], -1, (0, 255, 0), 2)
 
 
 receipt = four_point_transform(image, receiptCnt.reshape(4, 2) * ratio)
+gray = cv2.cvtColor(receipt, cv2.COLOR_BGR2GRAY)
+blurred = cv2.GaussianBlur(gray, (5, 5,), 0)
+edged = cv2.Canny(blurred, 75, 200)
 
 img = cv2.cvtColor(receipt,cv2.COLOR_BGR2GRAY)
 
-cv2.imshow('c',img)
+cv2.imshow('c',receipt)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
 
-img = np.resize(img, (1, 784))
+img = np.resize(img, (1, 28*28))
+print(img.size)
 
 
 # 데이터를 모델에 적용할 수 있도록 가공
-test_data = ((np.array(img) / 255) - 1) * -1
+# test_data = np.array(img)
 
-# 모델 불러오기
-model = load_model('Predict_Model.h5')
+# print(test_data)
+# # 모델 불러오기
+# model = load_model('Predict_Model.h5')
 
-# 클래스 예측 함수에 가공된 테스트 데이터 넣어 결과 도출
-# 2021/10/02 수정 - 오류시 아래 명령어로 대체 가능합니다.
-res =(model.predict(test_data) > 0.5).astype("int32")
+# # 클래스 예측 함수에 가공된 테스트 데이터 넣어 결과 도출
+# # 2021/10/02 수정 - 오류시 아래 명령어로 대체 가능합니다.
+# res =(model.predict(test_data))
 
-print(res)
+# print(res)
