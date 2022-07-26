@@ -99,7 +99,19 @@ def query():
         path = originalpath_today + "/" + i
         res = OCR(path)
         numbers = re.sub(r'[^0-9]', '', res)
-        print(numbers)
+        #print(numbers)
+        name,ext = os.path.splitext(i)
+        print(name,ext)
+        if numbers:
+            save = detectedpath_today + "/" + name  + "-" + str(numbers) + ext
+            org_image = cv2.imread(path)
+            cv2.imwrite(save,org_image)
+        else:
+            save = nondetectedpath_today + "/" + name  + "-X"+ ext
+            org_image = cv2.imread(path)
+            cv2.imwrite(save,org_image)
+
+        
 
     
 
