@@ -111,10 +111,6 @@ def query():
             org_image = cv2.imread(path)
             cv2.imwrite(save,org_image)
 
-        
-
-    
-
 def main(): 
     #path.json에서 주소 들고오기
     with open('setting.json','r') as f:
