@@ -1,4 +1,6 @@
 import json
+from random import random
+from socket import BTPROTO_RFCOMM
 import schedule
 import time
 import datetime as dt
@@ -9,17 +11,27 @@ import cv2
 from imutils.perspective import four_point_transform
 import re
 
+
+
+
 def OCR(path):
     org_image = cv2.imread(path)
     image = org_image
+    image = image[0:int(image.shape[0]*2/3),0:int(image.shape[1]/2)]
     ratio = image.shape[1] / float(image.shape[1])
     image = imutils.resize(image, width=500)
+
+   
 
     # 이미지를 grayscale로 변환하고 blur를 적용
     # 모서리를 찾기위한 이미지 연산
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     blurred = cv2.GaussianBlur(gray, (5, 5,), 0)
     edged = cv2.Canny(blurred, 75, 200)
+
+    cv2.imshow('c',edged)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
     cnts = cv2.findContours(edged.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cnts = imutils.grab_contours(cnts)
@@ -45,11 +57,23 @@ def OCR(path):
 
     receipt = four_point_transform(image, receiptCnt.reshape(4, 2) * ratio)
 
-    gray = cv2.cvtColor(receipt, cv2.COLOR_BGR2GRAY)
-    resized_gray = cv2.resize(gray,(104,104))
+    cv2.imshow('c',receipt)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
-    text = pytesseract.image_to_string(resized_gray, config="--psm 6")
-    return text
+    gray = cv2.cvtColor(receipt, cv2.COLOR_BGR2GRAY)
+    numbers = ""
+    size = 512
+    while not numbers:
+        resized_gray = cv2.resize(gray,(size,size))
+        #resized_gray = gray
+        text = pytesseract.image_to_string(resized_gray, config="--psm 6")
+        numbers = re.sub(r'[^0-9]', '', text)
+        #print(path, text, numbers, end="****")
+        size= size-64
+        if(size<64):
+            break
+    return numbers
 
 
 def makedirs(path): 
@@ -94,8 +118,7 @@ def query():
     for i in og_img_list:
         #print(i)
         path = originalpath_today + "/" + i
-        res = OCR(path)
-        numbers = re.sub(r'[^0-9]', '', res)
+        numbers = OCR(path)
         #print(numbers)
         name,ext = os.path.splitext(i)
         #print(name,ext)
@@ -118,7 +141,8 @@ def main():
     # step3.실행 주기 설정
     schedule.every().day.at(timedata).do(query)
     # step4.스캐쥴 시작
-    while True:
+    query();
+    while False:
         schedule.run_pending()
         time.sleep(1)
 
