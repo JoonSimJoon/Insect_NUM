@@ -1,5 +1,6 @@
 import json
 from random import random
+from socket import BTPROTO_RFCOMM
 import schedule
 import time
 import datetime as dt
@@ -53,10 +54,18 @@ def OCR(path):
     # cv2.destroyAllWindows()
 
     gray = cv2.cvtColor(receipt, cv2.COLOR_BGR2GRAY)
-    resized_gray = cv2.resize(gray,(512,512))
-    #resized_gray = gray
-    text = pytesseract.image_to_string(resized_gray, config="--psm 6")
-    return text
+    numbers = ""
+    size = 1024
+    while not numbers:
+        resized_gray = cv2.resize(gray,(size,size))
+        #resized_gray = gray
+        text = pytesseract.image_to_string(resized_gray, config="--psm 6")
+        numbers = re.sub(r'[^0-9]', '', text)
+        #print(path, text, numbers, end="****")
+        size= size-32
+        if(size<32):
+            break
+    return numbers
 
 
 def makedirs(path): 
@@ -101,11 +110,10 @@ def query():
     for i in og_img_list:
         #print(i)
         path = originalpath_today + "/" + i
-        res = OCR(path)
-        numbers = re.sub(r'[^0-9]', '', res)
+        numbers = OCR(path)
         #print(numbers)
         name,ext = os.path.splitext(i)
-        print(name,ext)
+        #print(name,ext)
         if numbers:
             save = detectedpath_today + "/" + name  + "-" + str(numbers) + ext
             org_image = cv2.imread(path)
@@ -125,8 +133,7 @@ def main():
     # step3.실행 주기 설정
     schedule.every().day.at(timedata).do(query)
     # step4.스캐쥴 시작
-    query()
-    while False:
+    while True:
         schedule.run_pending()
         time.sleep(1)
 
